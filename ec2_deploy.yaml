@@ -1,0 +1,58 @@
+---
+- name: Create ec2 instance
+  hosts: localhost
+  vars_files:
+    - regions/{{ region }}.yml
+  tasks: 
+    - name: Replace this line here
+      ec2: 
+        key_name: "{{ key_name}}"
+        assign_public_ip: yes
+        instance_type: "{{ instance_type }}"
+        region: "{{ region }}"
+        count: 1
+        image: "{{ image }}"
+        wait: yes
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        register: ec2
+    - name: Creating a Volume
+      ec2_vol:
+        instance: '"{{ item.id }}"'
+        volume_size: 10
+        device_name: "/dev/xvdf" 
+        region: '{{ region }}'
+        volume_type: gp2 
+      register: ec2_vol
+ 
+    - name: Printing the volume information
+      debug: var=ec2_vol  
+      
+    - name: creating mount point 
+      file:
+        state: directory
+        path: "/data"
+    
+    - name: formatting the volume
+      filesystem:
+        dev: "/dev/xvdf"
+        fstype: "xfs" 
+ 
+
+    - name: mounting the filesystem
+      mount:
+        name: "/data"
+        src: "fdisk"
+        fstype: "xfs" 
+        state: mounted
+
+    - name: Add user1
+      user:
+        name: user1
+        state: present
+
+    - name: generating ssh key for user1
+      user:
+        name: user1
+        generate_ssh_key: yes
+        ssh_key_bits: 2048
+        ssh_key_file: .ssh/id_rsa
