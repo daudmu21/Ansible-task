@@ -2,7 +2,7 @@
 - name: Create ec2 instance
   hosts: localhost
   vars_files:
-    - regions/{{ region }}.yml
+    - regions/"{{ region }}".yml
   tasks: 
     - name: Replace this line here
       ec2: 
